@@ -10,7 +10,7 @@ body{
 }
 
 .sidebar{
-    min-width:450px !important;
+    min-width:400px !important;
     background-color: #111B21;
     height:100vh;
 
