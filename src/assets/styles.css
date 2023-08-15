@@ -335,3 +335,18 @@ color: #01B29D;
     color: #00A884;
     font-weight: 600;
 }
+
+.status-sidebar{
+    height:100vh;
+    position:sticky;
+    top:0;
+    min-width:350px;
+    max-width:350px;
+    background:rgb(30,38,44)
+}
+
+.status-media{
+    width:70%;
+    min-width:500px;
+    background:rgb(11,20,26)
+}
