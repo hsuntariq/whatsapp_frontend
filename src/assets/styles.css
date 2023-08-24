@@ -472,3 +472,14 @@ gap:0.5rem;
     font-size: 0.9rem;
     font-weight:normal
 }
+
+.loader{
+                height:100vh !important;
+                display:flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .loader span{
+                color:red !important
+            }

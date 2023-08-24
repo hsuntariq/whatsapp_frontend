@@ -22,7 +22,8 @@ const App = () => {
           <Route path='/message/:id' element = {<MessageScreen/>} />
           <Route path='/' element = {<Home/>} />
       </Routes>
-    </Router>
+      </Router>
+      <ToastContainer/>
     </>
   )
 }

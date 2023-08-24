@@ -6,13 +6,18 @@ import { FaEllipsisV } from 'react-icons/fa';
 import { FiCircle } from 'react-icons/fi';
 import { AiOutlineLoading } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
+  const { user } = useSelector(state => state.auth);
+
   return (
     <>
          <div className="header">
             <div className="avatar">
-          <BiSolidUserCircle />
+          { user?.photo ? (
+            <img style={{width:'50px',height:'50px',borderRadius:'50%'}} src={user?.photo} alt="" />
+          ):(<BiSolidUserCircle />)}
             </div>
             <div className="icons" >
                   <BsChatLeftTextFill />
