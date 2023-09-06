@@ -16,6 +16,7 @@ const initialState = {
     isError: false,
     message: '',
     allUsers: [],
+    statuses:[],
 }
 
 
@@ -23,6 +24,7 @@ const initialState = {
 
 export const registerUser = createAsyncThunk('auth/register', async (userData, thunkApi) => {
     try {
+
         return await authService.registerUser(userData);
     } catch (error) {
        const message = (error.response && error.response.data && error.response.data.message) ||
@@ -41,6 +43,26 @@ export const getAllUsers = createAsyncThunk('auth/get-users', async (_, thunkApi
         return thunkApi.rejectWithValue(message);
     }
 })
+
+export const getStatuses = createAsyncThunk('auth/get-status',async(_,thunkApi)=>{
+    try{
+        return await authService.getStatuses()
+    }catch(error){
+        const message = (error.response && error.response.data && error.response.data.message) ||
+            error.message || error.toString();
+        return thunkApi.rejectWithValue(message);
+    }
+})
+
+export const addStatus = createAsyncThunk('auth/add-status', async (status,id, thunkApi) => {
+    try {
+        return await authService.addStatus(status,id);
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString()
+        return thunkApi.rejectWithValue(message);
+    }
+})
+
 
 export const authSlice = createSlice({
     name: 'auth',
@@ -83,6 +105,34 @@ export const authSlice = createSlice({
                 state.isLoading = false;
                 state.isSuccess = true;
                 state.allUsers = action.payload;
+            })
+            .addCase(getStatuses.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(getStatuses.rejected, (state, action) => {
+                    state.isLoading = false;
+                    state.isSuccess = false;
+                    state.isError= true;
+                    state.message = action.payload
+            })
+            .addCase(getStatuses.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.statuses = action.payload;
+            })
+            .addCase(addStatus.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(addStatus.rejected, (state, action) => {
+                    state.isLoading = false;
+                    state.isSuccess = false;
+                    state.isError= true;
+                    state.message = action.payload
+            })
+            .addCase(addStatus.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.statuses = action.payload;
             })
     }
 })
