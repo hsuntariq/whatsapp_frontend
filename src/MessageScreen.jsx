@@ -2,16 +2,95 @@ import { useParams } from "react-router-dom"
 import Footer from "./Footer"
 import Sidebar from "./Sidebar"
 import UserHeader from "./UserHeader"
+import Messages from "./Messages"
+import { useEffect,useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import io from 'socket.io-client';
+const socket = io.connect('http://localhost:3001');
+import { BsEmojiLaughing,BsPlusLg,BsFillMicFill } from 'react-icons/bs'
+import { addMessage } from './features/chat/chatSlice';
 
 
 const MessageScreen = () => {
+  const [sentMessages, setSentMessages] = useState([]);
+  const [recMessages, setRecMessages] = useState([]);
+  const [message, setMessage] = useState('');
+  const { chat } = useSelector(state => state.chat);
+  const dispatch = useDispatch();
+    const { chats, c_isLoading } = useSelector(state => state.chat);
+    const { user } = useSelector(state => state.auth);
+  useEffect(() => {
+    socket.on('received_message', (data) => {
+      setRecMessages([...recMessages,data]);
+    })
+    console.log(recMessages)
+    return () => {
+      socket.off('received_message');
+    }
+  }, [recMessages]);
+    const { id } = useParams()
+    // console.log(id === user?._id)
+
+    const chatContainerRef = useRef(null);
+
+  // scroll to the bottom
+      
+  useEffect(() => {
+    scrollToBottom();
+  }, [chats]);
+
+
+  function scrollToBottom() {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }
   
+  const sendMessage = () => {
+    socket.emit('message', message); 
+    socket.on('received_message', (data) => {
+      setSentMessages([...sentMessages, data]);
+    })
+    const data = {
+      message, receiver_id: id, sender_id: user._id,
+    };
+    // console.log(data)
+    dispatch(addMessage(data));
+    setMessage('')
+  }
+
   return (
     <main>
         <Sidebar/> 
           <div className="message-screen">
               <UserHeader />
-            <Footer/>
+            <div className="messages" ref={chatContainerRef} >
+                {chats?.chat?.map((chat) => {
+                    return <> <div className={`${id === chat?.sender_id ? 'received' : 'sent'} `}>
+                        <p  key={chat._id}>{chat.message} </p>        
+                        <div style={{fontSize:'0.7rem',color:'lightgray',textAlign:'right'}}>
+                          {chat?.time}
+                        </div>                    
+                            
+                            </div>
+                    </>
+                })}
+
+                {/* {console.log(chats.chat)} */}
+        </div>             
+        <footer>      
+            <div className="emojis">
+                <BsEmojiLaughing/>
+                <BsPlusLg/>
+            </div>
+              <div className="message" style={{display:'flex',alignItems:'center'}}>
+                  <input value={message} onChange={(e)=>setMessage(e.target.value)} type="text" placeholder='Type a message' />
+                  <span onClick={sendMessage} style={{cursor:'pointer'}}>Send</span>
+            </div>
+              <div className="voice">
+                  <BsFillMicFill/>
+            </div>
+        </footer>
         </div>
     </main>
   )
