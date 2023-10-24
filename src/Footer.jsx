@@ -8,16 +8,15 @@ const socket = io.connect('http://localhost:3001');
 
 const Footer = () => {
   const [message, setMessage] = useState('');
-  const { chat } = useSelector(state => state.auth);
+  const { chats } = useSelector(state => state.chat);
   const { user } = useSelector(state => state.auth);
   const [room, setRoom] = useState(null)
   const dispatch = useDispatch();
-  const { id } = useParams();
+  const { id,chat_id } = useParams();
+  
+
   const sendMessage = () => {
-    socket.emit('message', message); 
-    socket.on('received_message', (data) => {
-      alert(data);
-    })
+    socket.emit('sent', {message:message});
     const data = {
       message, receiver_id: id, sender_id: user._id,
     };
@@ -30,6 +29,8 @@ const Footer = () => {
         alert(data);
       })
     },[])
+
+  
   return (
     <>
         <footer>      

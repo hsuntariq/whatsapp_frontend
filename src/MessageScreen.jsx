@@ -19,22 +19,47 @@ const MessageScreen = () => {
   const dispatch = useDispatch();
     const { chats, c_isLoading } = useSelector(state => state.chat);
     const { user } = useSelector(state => state.auth);
+    // get the id and chat id from the params
+    const { id,chat_id } = useParams()
+  
+  // receive the socket message
   useEffect(() => {
     socket.on('received_message', (data) => {
-      setRecMessages([...recMessages,data]);
+      setRecMessages([...recMessages,{message:data.message,id:Date.now(),sent:false}]);
     })
-    console.log(recMessages)
-    return () => {
-      socket.off('received_message');
-    }
+    // return () => {
+    //   socket.off('received_message');
+    // }
   }, [recMessages]);
-    const { id } = useParams()
     // console.log(id === user?._id)
 
-    const chatContainerRef = useRef(null);
 
-  // scroll to the bottom
+ 
+  
+  const sendMessage = () => {
+    socket.emit('sent_message', {message:message,room:chat_id}); 
+      setSentMessages([...sentMessages, {message:message,id:Date.now(),sent:true}]);
+      setMessage('')
+    const data = {
+      message, receiver_id: id, sender_id: user._id,
+    };
+    // console.log(data)
+    dispatch(addMessage(data));
+  }
+  
+  const allMessages = [...sentMessages, ...recMessages].sort((a, b)=> {
+  return a._id - b._id;
+  })
+
+    // console.log(allMessages);
+
+  
+
+
+   // scroll to the bottom
       
+    const chatContainerRef = useRef(null);
+  
   useEffect(() => {
     scrollToBottom();
   }, [chats]);
@@ -45,27 +70,16 @@ const MessageScreen = () => {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
     }
   }
+
   
-  const sendMessage = () => {
-    socket.emit('message', message); 
-    socket.on('received_message', (data) => {
-      setSentMessages([...sentMessages, data]);
-    })
-    const data = {
-      message, receiver_id: id, sender_id: user._id,
-    };
-    // console.log(data)
-    dispatch(addMessage(data));
-    setMessage('')
-  }
 
   return (
     <main>
         <Sidebar/> 
           <div className="message-screen">
-              <UserHeader />
+        <UserHeader />
             <div className="messages" ref={chatContainerRef} >
-                {chats?.chat?.map((chat) => {
+                {/* {chats?.chat?.map((chat) => {
                     return <> <div className={`${id === chat?.sender_id ? 'received' : 'sent'} `}>
                         <p  key={chat._id}>{chat.message} </p>        
                         <div style={{fontSize:'0.7rem',color:'lightgray',textAlign:'right'}}>
@@ -74,7 +88,18 @@ const MessageScreen = () => {
                             
                             </div>
                     </>
+                })} */}
+          {allMessages.map((chat) => {
+                    return <> <div className= {`${chat.sent ? 'sent':'received'}`} >
+                        <p  key={chat._id}>{chat.message} </p>        
+                        <div style={{fontSize:'0.7rem',color:'lightgray',textAlign:'right'}}>
+                          {/* {chat?.time} */}
+                        </div>                    
+                            
+                            </div>
+                    </>
                 })}
+          
 
                 {/* {console.log(chats.chat)} */}
         </div>             
